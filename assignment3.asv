@@ -1,4 +1,5 @@
-function [] = assignment1(part2,part3)
+clear
+close all
 %% Beginning of Assignment 1
 %I'm not sure if I was supposed to do this report completely
 %in the publishing tool. I have a LaTeX document attached that has
@@ -7,16 +8,26 @@ function [] = assignment1(part2,part3)
 
 
 %Which parts are included in the run
-%part2 = true/false;
-%part3 = true/false;
+part2 = true;
+part3 = false;
 specular = true;%boundaries for part 3 boxes are specular, if false boxes are diffusive
 
 m_e = 9.1093837015e-31;%rest mass in kg
 m_n = 0.26*m_e;%Effective mass of electrons
+q = 1.602e-19;
+
 
 %Nominial size of the region in nm
 xlimit = [0 200e-9];
 ylimit = [0 100e-9];
+
+%% Assignment 3 Part 1
+
+Voltage = 0.1;%Volts
+E_field = Voltage/xlimit(2);
+Force = q*E_field;
+acceleration = Force/m_n;
+
 %% Part 1: Electron Modelling
 %% Part 1: Question 1: What is the thermal velocity?
 kb=1.380649e-23;%Boltzmann's constant [m^2*kg/K*s^2]
@@ -78,6 +89,7 @@ Px = zeros([timesteps particles]);
 Py = zeros([timesteps particles]);
 Temp = zeros([1 timesteps]);
 Time = zeros([1 timesteps]);
+J = zeros([1 timesteps]);%Drift current
 
 %% Part 2 Question initialization of variables for MFP and time between collisions
 numberOfCollisions = zeros([1 particles]);
@@ -98,6 +110,7 @@ for t = 0:dt:tr
     %% Part 2: Question 2 Scattering probabilities
     if part2
         Pscat = 1-exp(-(dt)/(tmn));%The scattering probability
+        Vx = Vx + acceleration*dt;
         for p = 1:particles
             if Pscat > rand
                 Vscatter(p) = sqrt(Vx(p)^2+Vy(p)^2);%Velocity of the particle when it scatters
@@ -108,7 +121,7 @@ for t = 0:dt:tr
                 normalized = [angX angY]./norm([angX angY]);
                 Rx = (vth)/sqrt(2).*randn + vth/sqrt(2);
                 Ry = (vth)/sqrt(2).*randn + vth/sqrt(2);
-                Vx(p) = Rx*normalized(1);
+                Vx(p) = Rx*normalized(1) + acceleration*dt;
                 Vy(p) = Ry*normalized(2);
                 
                 %Find the time and distance since the last collision
@@ -197,9 +210,8 @@ for t = 0:dt:tr
     %Temp and Time
     Temp(n) = (2/3)*(1/kb)*(1/2)*m_n*(sum(Vx.^2+Vy.^2))/p;
     Time(n) = t;
-    %% Part 3 Question 4: Temperature map
-    
-    
+    %Save the drift current at this time
+    J(n) = q*concentration*Vx(n);
     %% Proceed to next column of matrix that plots particle trajectories for data storage
     n=n+1;%New column in matrix for each timestep
 end
@@ -241,14 +253,6 @@ grid on
 %% Part 2: Collisions with Mean Free Path
 %Velocity from part 1 is now assigned random velocities using
 %Maxwell-Boltzmann, average speed should be vth
-%% Part 2: Question 1 Histogram
-V = sqrt(Vx.^2+Vy.^2);%get the velocity of each particle
-figure;
-histogram(V,50)%Plot histogram of Boltzmann distribution of velocities
-xlabel('Velocity');
-ylabel('Number of particles in bin');
-title('Histogram of particle velocities')
-
 %% Part 3: Enhancements
 %% Part 3 Question 3: Electron Density map
 [q,r] = size(Px);%dimension q is the final index of the timesteps for each particle
@@ -259,7 +263,12 @@ ylim(ylimit)
 xlabel('x');
 ylabel('y');
 
-%% Part 3 Question 4: Temperature map
+%% Assignment 3 Question 1D: Current Density vs Time
+figure;
+plot(Time,J,'-')
+xlabel('Time (s)');
+ylabel('Current (A)');
+title('Current Density Plot')
+grid on
 
 %% End of assignment
-end

@@ -76,9 +76,7 @@ for i = 1:nx
         elseif i == nx
             G(n, :) = 0;
             G(n, n) = 1;
-            if ~Part1QuestionA
-                B(n) = 1;%Set boundary conditions 2
-            end
+            
         elseif j == 1
             nxm = j + (i - 2) * ny;
             nxp = j + (i) * ny;
@@ -144,25 +142,6 @@ for i = 1:nx
     end
 end
 surf(Vmap')
-%% Part 1: Question B - Analytical Plot
-figure;
-L = nx;
-W = ny;
-VanalyticalNew = zeros(L+1,W+1);
-VanalyticalSum = zeros(L+1,W+1);
-for n = 1:2:100
-    for x = 1:(L+1)
-        for y = 1:(W+1)
-            p = x - L/2 - 1;%shift values over so centre of function is half the length
-            q = y -1;
-            VanalyticalNew(x,y) = 4/pi*(1/n)*(cosh((n*pi*p)/(W))/cosh((n*pi*(L)/2)/(W)))*sin((n*pi*q)/(W));
-        end
-    end
-    VanalyticalSum = (VanalyticalSum + VanalyticalNew);
-    surf(VanalyticalSum');
-    %pause(0.5)
-end
-
 %% Part 2: Question A - Plots of Conductivity (cMap), Voltage (Vmap), Electric Field (Ex, Ey) and Current Density (Jx,Jy)
 for i = 1:nx
     for j = 1:ny
